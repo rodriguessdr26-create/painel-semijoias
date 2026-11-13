@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Vendas • Semijoias</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+  </style>
+</head>
+<body class="text-slate-800">
+
+  <!-- TELA DE LOGIN -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-lg max-w-sm w-full border border-slate-100">
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mx-auto mb-3 text-2xl">✨</div>
+        <h1 class="text-xl font-bold text-slate-900">Painel de Semijoias</h1>
+        <p class="text-sm text-slate-500 mt-1">Digite a senha para acessar as vendas</p>
+      </div>
+      <form onsubmit="fazerLogin(event)" class="space-y-4">
+        <input type="password" id="senhaInput" placeholder="Senha de acesso" required
+          class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-center text-lg tracking-widest" />
+        <button type="submit"
+          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition">
+          Entrar no Painel
+        </button>
+      </form>
+      <p id="loginErro" class="text-red-500 text-xs text-center mt-3 hidden">Senha incorreta ou erro de conexão.</p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PRINCIPAL -->
+  <div id="appScreen" class="hidden max-w-6xl mx-auto p-4 md:p-6 pb-24">
+    
+    <!-- Cabeçalho -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <span>✨</span> Controle de Vendas
+        </h1>
+        <p class="text-sm text-slate-500">Sincronizado em tempo real com Google Sheets</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="carregarDados()" title="Atualizar dados"
+          class="px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition flex items-center gap-1.5">
+          <span id="syncIcon">🔄</span> Atualizar
+        </button>
+        <button onclick="abrirModalNovaVenda()"
+          class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-sm transition flex items-center gap-1.5">
+          <span>+</span> Nova Venda
+        </button>
+      </div>
+    </header>
+
+    <!-- Cards de KPI -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <p class="text-xs font-medium text-slate-500 uppercase">Total Vendido</p>
+        <p id="kpiTotal" class="text-xl md:text-2xl font-bold text-slate-900 mt-1">R$ 0,00</p>
+        <p id="kpiQtd" class="text-xs text-slate-400 mt-1">0 vendas</p>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <p class="text-xs font-medium text-emerald-600 uppercase">Já Recebido</p>
+        <p id="kpiRecebido" class="text-xl md:text-2xl font-bold text-emerald-600 mt-1">R$ 0,00</p>
+        <p id="kpiPerc" class="text-xs text-slate-400 mt-1">0% do total</p>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <p class="text-xs font-medium text-amber-600 uppercase">A Receber</p>
+        <p id="kpiReceber" class="text-xl md:text-2xl font-bold text-amber-600 mt-1">R$ 0,00</p>
+        <p class="text-xs text-slate-400 mt-1">Saldo em aberto</p>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <p class="text-xs font-medium text-rose-600 uppercase">Em Atraso</p>
+        <p id="kpiAtraso" class="text-xl md:text-2xl font-bold text-rose-600 mt-1">R$ 0,00</p>
+        <p class="text-xs text-slate-400 mt-1">Prazo vencido</p>
+      </div>
+    </section>
+
+    <!-- Filtros e Busca -->
+    <section class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-4">
+      <div class="flex flex-col md:flex-row gap-3">
+        <input type="text" id="buscaInput" oninput="renderizarTabela()"
+          placeholder="Buscar por cliente, código de garantia ou produto..."
+          class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        
+        <select id="filtroSituacao" onchange="renderizarTabela()"
+          class="px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+          <option value="TODOS">Todas as Situações</option>
+          <option value="EM_ABERTO">Em Aberto (Em dia + Atrasado)</option>
+          <option value="Em dia">Em dia</option>
+          <option value="Atrasado">Atrasado</option>
+          <option value="Quitado">Quitado</option>
+        </select>
+
+        <select id="filtroVinculo" onchange="renderizarTabela()"
+          class="px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+          <option value="TODOS">Todos os Vínculos</option>
+          <option value="Trabalho">Trabalho</option>
+          <option value="Faculdade">Faculdade</option>
+          <option value="Família">Família</option>
+          <option value="Amigos">Amigos</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Lista / Tabela de Vendas -->
+    <section class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase">
+              <th class="p-3.5">Garantia</th>
+              <th class="p-3.5">Cliente</th>
+              <th class="p-3.5">Produto</th>
+              <th class="p-3.5">Valor</th>
+              <th class="p-3.5">Entrada</th>
+              <th class="p-3.5">Falta</th>
+              <th class="p-3.5">Prazo</th>
+              <th class="p-3.5">Situação</th>
+              <th class="p-3.5 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaVendas" class="divide-y divide-slate-100 text-sm">
+            <!-- Preenchido via JS -->
+          </tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="hidden p-8 text-center text-slate-400 text-sm">
+        Nenhuma venda encontrada com esses filtros.
+      </div>
+    </section>
+  </div>
+
+  <!-- MODAL CADASTRAR / EDITAR VENDA -->
+  <div id="modalVenda" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h2 id="modalTitulo" class="text-lg font-bold text-slate-900">Nova Venda</h2>
+        <button onclick="fecharModal()" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
+      </div>
+
+      <form id="formVenda" onsubmit="salvarVenda(event)" class="space-y-4">
+        <input type="hidden" id="editRowNumber" />
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Cód. Garantia *</label>
+            <input type="text" id="campoGarantia" required placeholder="Ex: 28 ou COD-123"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Data da Venda *</label>
+            <input type="date" id="campoData" required
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Cliente *</label>
+            <input type="text" id="campoCliente" required placeholder="Nome da cliente"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Vínculo *</label>
+            <select id="campoVinculo" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+              <option value="Trabalho">Trabalho</option>
+              <option value="Faculdade">Faculdade</option>
+              <option value="Família">Família</option>
+              <option value="Amigos">Amigos</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Produto *</label>
+            <input type="text" id="campoProduto" list="listaProdutos" required placeholder="Brinco, Anel..."
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+            <datalist id="listaProdutos">
+              <option value="Brinco">
+              <option value="Corrente">
+              <option value="Anel">
+              <option value="Pulseira">
+              <option value="Conjunto">
+              <option value="Tornozeleira">
+            </datalist>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Valor Total (R$) *</label>
+            <input type="number" step="0.01" id="campoValor" required placeholder="100.00"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Forma de Pagamento</label>
+            <select id="campoForma" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+              <option value="Pix">Pix</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão">Cartão</option>
+              <option value="Duas formas">Duas formas</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Status Pagamento</label>
+            <select id="campoPagamento" onchange="verificarQuitacao()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+              <option value="Pendente">Pendente</option>
+              <option value="OK">OK (Quitado)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Já Pagou / Entrada (R$)</label>
+            <input type="number" step="0.01" id="campoEntrada" value="0"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Prazo Final</label>
+            <input type="date" id="campoPrazo"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+          <button type="button" id="btnExcluir" onclick="excluirVenda()"
+            class="hidden px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-sm font-medium">
+            Excluir Venda
+          </button>
+          <div class="flex gap-2 ml-auto">
+            <button type="button" onclick="fecharModal()"
+              class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-600">
+              Cancelar
+            </button>
+            <button type="submit" id="btnSalvar"
+              class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold">
+              Salvar na Planilha
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT (terminada em /exec)
+    const API_URL = "https://script.google.com/macros/s/AKfycbwXPdQzegDe1-ELu6E34cN4l0eiqGGhlteP96mYpFmri_IQWJA6ZZyAsyYNNzG7gZRa/exec";
+
+    let senhaAtual = sessionStorage.getItem("semijoias_senha") || "";
+    let todasVendas = [];
+
+    if (senhaAtual) {
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("appScreen").classList.remove("hidden");
+      carregarDados();
+    }
+
+    async function fazerLogin(e) {
+      e.preventDefault();
+      senhaAtual = document.getElementById("senhaInput").value;
+      const ok = await carregarDados();
+      if (ok) {
+        sessionStorage.setItem("semijoias_senha", senhaAtual);
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("appScreen").classList.remove("hidden");
+        document.getElementById("loginErro").classList.add("hidden");
+      } else {
+        document.getElementById("loginErro").classList.remove("hidden");
+      }
+    }
+
+    async function carregarDados() {
+      const icon = document.getElementById("syncIcon");
+      if (icon) icon.classList.add("animate-spin");
+      try {
+        const res = await fetch(`${API_URL}?senha=${encodeURIComponent(senhaAtual)}`);
+        const data = await res.json();
+        if (data.status === "ok") {
+          todasVendas = data.vendas;
+          atualizarKPIs();
+          renderizarTabela();
+          if (icon) icon.classList.remove("animate-spin");
+          return true;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      if (icon) icon.classList.remove("animate-spin");
+      return false;
+    }
+
+    function atualizarKPIs() {
+      let total = 0, receber = 0, atraso = 0;
+      todasVendas.forEach(v => {
+        total += v.valor;
+        receber += v.falta;
+        if (v.situacao === "Atrasado") atraso += v.falta;
+      });
+      const recebido = total - receber;
+      const perc = total > 0 ? ((recebido / total) * 100).toFixed(1) : 0;
+
+      document.getElementById("kpiTotal").innerText = formatarMoeda(total);
+      document.getElementById("kpiQtd").innerText = `${todasVendas.length} vendas cadastradas`;
+      document.getElementById("kpiRecebido").innerText = formatarMoeda(recebido);
+      document.getElementById("kpiPerc").innerText = `${perc}% do total`;
+      document.getElementById("kpiReceber").innerText = formatarMoeda(receber);
+      document.getElementById("kpiAtraso").innerText = formatarMoeda(atraso);
+    }
+
+    function renderizarTabela() {
+      const busca = document.getElementById("buscaInput").value.toLowerCase();
+      const sit = document.getElementById("filtroSituacao").value;
+      const vinc = document.getElementById("filtroVinculo").value;
+
+      const filtradas = todasVendas.filter(v => {
+        const matchBusca = v.cliente.toLowerCase().includes(busca) ||
+                           v.garantia.toLowerCase().includes(busca) ||
+                           v.produto.toLowerCase().includes(busca);
+        const matchSit = sit === "TODOS" ? true :
+                         sit === "EM_ABERTO" ? v.falta > 0 :
+                         v.situacao === sit;
+        const matchVinc = vinc === "TODOS" ? true : v.vinculo === vinc;
+        return matchBusca && matchSit && matchVinc;
+      });
+
+      const tbody = document.getElementById("tabelaVendas");
+      const empty = document.getElementById("emptyState");
+      tbody.innerHTML = "";
+
+      if (filtradas.length === 0) {
+        empty.classList.remove("hidden");
+        return;
+      }
+      empty.classList.add("hidden");
+
+      filtradas.forEach(v => {
+        let badgeClass = "bg-slate-100 text-slate-700";
+        if (v.situacao === "Quitado") badgeClass = "bg-emerald-100 text-emerald-700";
+        if (v.situacao === "Em dia") badgeClass = "bg-amber-100 text-amber-700";
+        if (v.situacao === "Atrasado") badgeClass = "bg-rose-100 text-rose-700";
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="p-3.5 font-mono text-xs font-semibold text-slate-600">#${v.garantia}</td>
+          <td class="p-3.5">
+            <div class="font-semibold text-slate-900">${v.cliente}</div>
+            <div class="text-xs text-slate-400">${v.vinculo}</div>
+          </td>
+          <td class="p-3.5 text-slate-700">${v.produto}</td>
+          <td class="p-3.5 font-medium">${formatarMoeda(v.valor)}</td>
+          <td class="p-3.5 text-emerald-600 font-medium">${formatarMoeda(v.entrada)}</td>
+          <td class="p-3.5 font-bold ${v.falta > 0 ? 'text-amber-600' : 'text-slate-400'}">${formatarMoeda(v.falta)}</td>
+          <td class="p-3.5 text-xs text-slate-500">${formatarDataBR(v.prazo)}</td>
+          <td class="p-3.5">
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeClass}">${v.situacao}</span>
+          </td>
+          <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
+            ${v.falta > 0 ? `<button onclick='quitarRapido(${JSON.stringify(v)})' class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-semibold transition">Quitar</button>` : ''}
+            <button onclick='abrirModalEditar(${JSON.stringify(v)})' class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">Editar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function abrirModalNovaVenda() {
+      document.getElementById("modalTitulo").innerText = "Nova Venda";
+      document.getElementById("editRowNumber").value = "";
+      document.getElementById("formVenda").reset();
+      document.getElementById("campoData").value = new Date().toISOString().split("T")[0];
+      document.getElementById("btnExcluir").classList.add("hidden");
+      document.getElementById("modalVenda").classList.remove("hidden");
+      document.getElementById("modalVenda").classList.add("flex");
+    }
+
+    function abrirModalEditar(v) {
+      document.getElementById("modalTitulo").innerText = `Editar Venda #${v.garantia}`;
+      document.getElementById("editRowNumber").value = v.rowNumber;
+      document.getElementById("campoGarantia").value = v.garantia;
+      document.getElementById("campoData").value = v.dataVenda;
+      document.getElementById("campoCliente").value = v.cliente;
+      document.getElementById("campoVinculo").value = v.vinculo;
+      document.getElementById("campoProduto").value = v.produto;
+      document.getElementById("campoValor").value = v.valor;
+      document.getElementById("campoForma").value = v.formaPagamento;
+      document.getElementById("campoPagamento").value = v.pagamento;
+      document.getElementById("campoEntrada").value = v.entrada;
+      document.getElementById("campoPrazo").value = v.prazo;
+      document.getElementById("btnExcluir").classList.remove("hidden");
+      document.getElementById("modalVenda").classList.remove("hidden");
+      document.getElementById("modalVenda").classList.add("flex");
+    }
+
+    function fecharModal() {
+      document.getElementById("modalVenda").classList.add("hidden");
+      document.getElementById("modalVenda").classList.remove("flex");
+    }
+
+    function verificarQuitacao() {
+      if (document.getElementById("campoPagamento").value === "OK") {
+        document.getElementById("campoEntrada").value = document.getElementById("campoValor").value;
+      }
+    }
+
+    async function salvarVenda(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnSalvar");
+      btn.disabled = true;
+      btn.innerText = "Salvando...";
+
+      const rowNumber = document.getElementById("editRowNumber").value;
+      const dados = {
+        garantia: document.getElementById("campoGarantia").value,
+        dataVenda: document.getElementById("campoData").value,
+        cliente: document.getElementById("campoCliente").value,
+        vinculo: document.getElementById("campoVinculo").value,
+        produto: document.getElementById("campoProduto").value,
+        valor: parseFloat(document.getElementById("campoValor").value) || 0,
+        formaPagamento: document.getElementById("campoForma").value,
+        pagamento: document.getElementById("campoPagamento").value,
+        entrada: parseFloat(document.getElementById("campoEntrada").value) || 0,
+        prazo: document.getElementById("campoPrazo").value
+      };
+
+      await enviarParaPlanilha({
+        senha: senhaAtual,
+        action: rowNumber ? "update" : "create",
+        rowNumber: rowNumber,
+        dados: dados
+      });
+
+      btn.disabled = false;
+      btn.innerText = "Salvar na Planilha";
+      fecharModal();
+      await carregarDados();
+    }
+
+    async function quitarRapido(v) {
+      if (!confirm(`Confirmar quitação total de ${v.cliente} (${formatarMoeda(v.valor)})?`)) return;
+      v.pagamento = "OK";
+      v.entrada = v.valor;
+      await enviarParaPlanilha({
+        senha: senhaAtual,
+        action: "update",
+        rowNumber: v.rowNumber,
+        dados: v
+      });
+      await carregarDados();
+    }
+
+    async function excluirVenda() {
+      const rowNumber = document.getElementById("editRowNumber").value;
+      if (!confirm("Tem certeza que deseja excluir esta venda da planilha?")) return;
+      await enviarParaPlanilha({
+        senha: senhaAtual,
+        action: "delete",
+        rowNumber: rowNumber
+      });
+      fecharModal();
+      await carregarDados();
+    }
+
+    async function enviarParaPlanilha(payload) {
+      await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+    }
+
+    function formatarMoeda(val) {
+      return Number(val || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    function formatarDataBR(iso) {
+      if (!iso) return "-";
+      const [y, m, d] = iso.split("-");
+      return `${d}/${m}/${y}`;
+    }
+  </script>
+</body>
+</html>
