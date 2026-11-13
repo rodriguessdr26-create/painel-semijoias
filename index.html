@@ -6,9 +6,7 @@
   <title>Controle de Vendas • Semijoias</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-  </style>
+  <style>body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }</style>
 </head>
 <body class="text-slate-800">
 
@@ -20,38 +18,30 @@
         <h1 class="text-xl font-bold text-slate-900">Painel de Semijoias</h1>
         <p class="text-sm text-slate-500 mt-1">Digite a senha para acessar as vendas</p>
       </div>
-      <form onsubmit="fazerLogin(event)" class="space-y-4">
-        <input type="password" id="senhaInput" placeholder="Senha de acesso" required
+      
+      <!-- Usando onclick no botão para evitar recarregamento de form -->
+      <div class="space-y-4">
+        <input type="password" id="senhaInput" placeholder="Senha de acesso" value="1234"
           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-center text-lg tracking-widest" />
-        <button type="submit"
-          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition">
+        <button type="button" onclick="fazerLogin()"
+          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition cursor-pointer">
           Entrar no Painel
         </button>
-      </form>
+      </div>
       <p id="loginErro" class="text-red-500 text-xs text-center mt-3 hidden">Senha incorreta ou erro de conexão.</p>
     </div>
   </div>
 
   <!-- DASHBOARD PRINCIPAL -->
   <div id="appScreen" class="hidden max-w-6xl mx-auto p-4 md:p-6 pb-24">
-    
-    <!-- Cabeçalho -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <span>✨</span> Controle de Vendas
-        </h1>
-        <p class="text-sm text-slate-500">Sincronizado em tempo real com Google Sheets</p>
+        <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2"><span>✨</span> Controle de Vendas</h1>
+        <p class="text-sm text-slate-500">Sincronizado com Google Sheets</p>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="carregarDados()" title="Atualizar dados"
-          class="px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition flex items-center gap-1.5">
-          <span id="syncIcon">🔄</span> Atualizar
-        </button>
-        <button onclick="abrirModalNovaVenda()"
-          class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-sm transition flex items-center gap-1.5">
-          <span>+</span> Nova Venda
-        </button>
+        <button onclick="carregarDados()" class="px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-sm font-medium text-slate-700 transition">🔄 Atualizar</button>
+        <button onclick="abrirModalNovaVenda()" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-sm transition">+ Nova Venda</button>
       </div>
     </header>
 
@@ -60,53 +50,22 @@
       <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <p class="text-xs font-medium text-slate-500 uppercase">Total Vendido</p>
         <p id="kpiTotal" class="text-xl md:text-2xl font-bold text-slate-900 mt-1">R$ 0,00</p>
-        <p id="kpiQtd" class="text-xs text-slate-400 mt-1">0 vendas</p>
       </div>
       <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <p class="text-xs font-medium text-emerald-600 uppercase">Já Recebido</p>
         <p id="kpiRecebido" class="text-xl md:text-2xl font-bold text-emerald-600 mt-1">R$ 0,00</p>
-        <p id="kpiPerc" class="text-xs text-slate-400 mt-1">0% do total</p>
       </div>
       <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <p class="text-xs font-medium text-amber-600 uppercase">A Receber</p>
         <p id="kpiReceber" class="text-xl md:text-2xl font-bold text-amber-600 mt-1">R$ 0,00</p>
-        <p class="text-xs text-slate-400 mt-1">Saldo em aberto</p>
       </div>
       <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <p class="text-xs font-medium text-rose-600 uppercase">Em Atraso</p>
         <p id="kpiAtraso" class="text-xl md:text-2xl font-bold text-rose-600 mt-1">R$ 0,00</p>
-        <p class="text-xs text-slate-400 mt-1">Prazo vencido</p>
       </div>
     </section>
 
-    <!-- Filtros e Busca -->
-    <section class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-4">
-      <div class="flex flex-col md:flex-row gap-3">
-        <input type="text" id="buscaInput" oninput="renderizarTabela()"
-          placeholder="Buscar por cliente, código de garantia ou produto..."
-          class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
-        
-        <select id="filtroSituacao" onchange="renderizarTabela()"
-          class="px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
-          <option value="TODOS">Todas as Situações</option>
-          <option value="EM_ABERTO">Em Aberto (Em dia + Atrasado)</option>
-          <option value="Em dia">Em dia</option>
-          <option value="Atrasado">Atrasado</option>
-          <option value="Quitado">Quitado</option>
-        </select>
-
-        <select id="filtroVinculo" onchange="renderizarTabela()"
-          class="px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
-          <option value="TODOS">Todos os Vínculos</option>
-          <option value="Trabalho">Trabalho</option>
-          <option value="Faculdade">Faculdade</option>
-          <option value="Família">Família</option>
-          <option value="Amigos">Amigos</option>
-        </select>
-      </div>
-    </section>
-
-    <!-- Lista / Tabela de Vendas -->
+    <!-- Tabela -->
     <section class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
@@ -123,134 +82,60 @@
               <th class="p-3.5 text-right">Ações</th>
             </tr>
           </thead>
-          <tbody id="tabelaVendas" class="divide-y divide-slate-100 text-sm">
-            <!-- Preenchido via JS -->
-          </tbody>
+          <tbody id="tabelaVendas" class="divide-y divide-slate-100 text-sm"></tbody>
         </table>
-      </div>
-      <div id="emptyState" class="hidden p-8 text-center text-slate-400 text-sm">
-        Nenhuma venda encontrada com esses filtros.
       </div>
     </section>
   </div>
 
-  <!-- MODAL CADASTRAR / EDITAR VENDA -->
-  <div id="modalVenda" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+  <!-- MODAL -->
+  <div id="modalVenda" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4">
-        <h2 id="modalTitulo" class="text-lg font-bold text-slate-900">Nova Venda</h2>
-        <button onclick="fecharModal()" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
-      </div>
-
-      <form id="formVenda" onsubmit="salvarVenda(event)" class="space-y-4">
+      <h2 id="modalTitulo" class="text-lg font-bold text-slate-900 mb-4">Nova Venda</h2>
+      <form onsubmit="salvarVenda(event)" class="space-y-4">
         <input type="hidden" id="editRowNumber" />
-
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Cód. Garantia *</label>
-            <input type="text" id="campoGarantia" required placeholder="Ex: 28 ou COD-123"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Data da Venda *</label>
-            <input type="date" id="campoData" required
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
-          </div>
+          <div><label class="text-xs font-semibold">Cód. Garantia *</label><input type="text" id="campoGarantia" required class="w-full px-3 py-2 rounded-xl border text-sm" /></div>
+          <div><label class="text-xs font-semibold">Data *</label><input type="date" id="campoData" required class="w-full px-3 py-2 rounded-xl border text-sm" /></div>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Cliente *</label>
-            <input type="text" id="campoCliente" required placeholder="Nome da cliente"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Vínculo *</label>
-            <select id="campoVinculo" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
-              <option value="Trabalho">Trabalho</option>
-              <option value="Faculdade">Faculdade</option>
-              <option value="Família">Família</option>
-              <option value="Amigos">Amigos</option>
-              <option value="Outro">Outro</option>
+          <div><label class="text-xs font-semibold">Cliente *</label><input type="text" id="campoCliente" required class="w-full px-3 py-2 rounded-xl border text-sm" /></div>
+          <div><label class="text-xs font-semibold">Vínculo</label>
+            <select id="campoVinculo" class="w-full px-3 py-2 rounded-xl border text-sm bg-white">
+              <option value="Trabalho">Trabalho</option><option value="Faculdade">Faculdade</option><option value="Família">Família</option><option value="Amigos">Amigos</option>
             </select>
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Produto *</label>
-            <input type="text" id="campoProduto" list="listaProdutos" required placeholder="Brinco, Anel..."
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
-            <datalist id="listaProdutos">
-              <option value="Brinco">
-              <option value="Corrente">
-              <option value="Anel">
-              <option value="Pulseira">
-              <option value="Conjunto">
-              <option value="Tornozeleira">
-            </datalist>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Valor Total (R$) *</label>
-            <input type="number" step="0.01" id="campoValor" required placeholder="100.00"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
-          </div>
+          <div><label class="text-xs font-semibold">Produto *</label><input type="text" id="campoProduto" required class="w-full px-3 py-2 rounded-xl border text-sm" /></div>
+          <div><label class="text-xs font-semibold">Valor Total *</label><input type="number" step="0.01" id="campoValor" required class="w-full px-3 py-2 rounded-xl border text-sm" /></div>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Forma de Pagamento</label>
-            <select id="campoForma" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
-              <option value="Pix">Pix</option>
-              <option value="Dinheiro">Dinheiro</option>
-              <option value="Cartão">Cartão</option>
-              <option value="Duas formas">Duas formas</option>
+          <div><label class="text-xs font-semibold">Forma Pagto</label>
+            <select id="campoForma" class="w-full px-3 py-2 rounded-xl border text-sm bg-white">
+              <option value="Pix">Pix</option><option value="Dinheiro">Dinheiro</option><option value="Cartão">Cartão</option>
             </select>
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Status Pagamento</label>
-            <select id="campoPagamento" onchange="verificarQuitacao()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
-              <option value="Pendente">Pendente</option>
-              <option value="OK">OK (Quitado)</option>
+          <div><label class="text-xs font-semibold">Status</label>
+            <select id="campoPagamento" class="w-full px-3 py-2 rounded-xl border text-sm bg-white">
+              <option value="Pendente">Pendente</option><option value="OK">OK (Quitado)</option>
             </select>
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Já Pagou / Entrada (R$)</label>
-            <input type="number" step="0.01" id="campoEntrada" value="0"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Prazo Final</label>
-            <input type="date" id="campoPrazo"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
-          </div>
+          <div><label class="text-xs font-semibold">Entrada</label><input type="number" step="0.01" id="campoEntrada" value="0" class="w-full px-3 py-2 rounded-xl border text-sm" /></div>
+          <div><label class="text-xs font-semibold">Prazo</label><input type="date" id="campoPrazo" class="w-full px-3 py-2 rounded-xl border text-sm" /></div>
         </div>
-
-        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-          <button type="button" id="btnExcluir" onclick="excluirVenda()"
-            class="hidden px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-sm font-medium">
-            Excluir Venda
-          </button>
-          <div class="flex gap-2 ml-auto">
-            <button type="button" onclick="fecharModal()"
-              class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-600">
-              Cancelar
-            </button>
-            <button type="submit" id="btnSalvar"
-              class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold">
-              Salvar na Planilha
-            </button>
-          </div>
+        <div class="flex justify-end gap-2 pt-4 border-t">
+          <button type="button" onclick="fecharModal()" class="px-4 py-2 border rounded-xl text-sm">Cancelar</button>
+          <button type="submit" class="px-5 py-2 bg-amber-600 text-white rounded-xl text-sm font-semibold">Salvar</button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
-    // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT (terminada em /exec)
+    // COLE SUA URL DO APPS SCRIPT ABAIXO ENTRE AS ASPAS:
     const API_URL = "https://script.google.com/macros/s/AKfycbxDUabsMeu7Rt0BXCUzcWNBm4yYg0qoIkDzwfMWD6SN0W2_7C1pykF2_bSzFm09DUQj/exec
 ";
 
@@ -263,8 +148,7 @@
       carregarDados();
     }
 
-    async function fazerLogin(e) {
-      e.preventDefault();
+    async function fazerLogin() {
       senhaAtual = document.getElementById("senhaInput").value;
       const ok = await carregarDados();
       if (ok) {
@@ -278,8 +162,6 @@
     }
 
     async function carregarDados() {
-      const icon = document.getElementById("syncIcon");
-      if (icon) icon.classList.add("animate-spin");
       try {
         const res = await fetch(`${API_URL}?senha=${encodeURIComponent(senhaAtual)}`);
         const data = await res.json();
@@ -287,13 +169,11 @@
           todasVendas = data.vendas;
           atualizarKPIs();
           renderizarTabela();
-          if (icon) icon.classList.remove("animate-spin");
           return true;
         }
       } catch (err) {
         console.error(err);
       }
-      if (icon) icon.classList.remove("animate-spin");
       return false;
     }
 
@@ -305,85 +185,47 @@
         if (v.situacao === "Atrasado") atraso += v.falta;
       });
       const recebido = total - receber;
-      const perc = total > 0 ? ((recebido / total) * 100).toFixed(1) : 0;
 
       document.getElementById("kpiTotal").innerText = formatarMoeda(total);
-      document.getElementById("kpiQtd").innerText = `${todasVendas.length} vendas cadastradas`;
       document.getElementById("kpiRecebido").innerText = formatarMoeda(recebido);
-      document.getElementById("kpiPerc").innerText = `${perc}% do total`;
       document.getElementById("kpiReceber").innerText = formatarMoeda(receber);
       document.getElementById("kpiAtraso").innerText = formatarMoeda(atraso);
     }
 
     function renderizarTabela() {
-      const busca = document.getElementById("buscaInput").value.toLowerCase();
-      const sit = document.getElementById("filtroSituacao").value;
-      const vinc = document.getElementById("filtroVinculo").value;
-
-      const filtradas = todasVendas.filter(v => {
-        const matchBusca = v.cliente.toLowerCase().includes(busca) ||
-                           v.garantia.toLowerCase().includes(busca) ||
-                           v.produto.toLowerCase().includes(busca);
-        const matchSit = sit === "TODOS" ? true :
-                         sit === "EM_ABERTO" ? v.falta > 0 :
-                         v.situacao === sit;
-        const matchVinc = vinc === "TODOS" ? true : v.vinculo === vinc;
-        return matchBusca && matchSit && matchVinc;
-      });
-
       const tbody = document.getElementById("tabelaVendas");
-      const empty = document.getElementById("emptyState");
       tbody.innerHTML = "";
-
-      if (filtradas.length === 0) {
-        empty.classList.remove("hidden");
-        return;
-      }
-      empty.classList.add("hidden");
-
-      filtradas.forEach(v => {
+      todasVendas.forEach(v => {
         let badgeClass = "bg-slate-100 text-slate-700";
         if (v.situacao === "Quitado") badgeClass = "bg-emerald-100 text-emerald-700";
         if (v.situacao === "Em dia") badgeClass = "bg-amber-100 text-amber-700";
         if (v.situacao === "Atrasado") badgeClass = "bg-rose-100 text-rose-700";
 
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50 transition";
+        tr.className = "hover:bg-slate-50";
         tr.innerHTML = `
-          <td class="p-3.5 font-mono text-xs font-semibold text-slate-600">#${v.garantia}</td>
-          <td class="p-3.5">
-            <div class="font-semibold text-slate-900">${v.cliente}</div>
-            <div class="text-xs text-slate-400">${v.vinculo}</div>
-          </td>
-          <td class="p-3.5 text-slate-700">${v.produto}</td>
-          <td class="p-3.5 font-medium">${formatarMoeda(v.valor)}</td>
-          <td class="p-3.5 text-emerald-600 font-medium">${formatarMoeda(v.entrada)}</td>
+          <td class="p-3.5 font-mono text-xs font-semibold">#${v.garantia}</td>
+          <td class="p-3.5"><div class="font-semibold">${v.cliente}</div><div class="text-xs text-slate-400">${v.vinculo}</div></td>
+          <td class="p-3.5">${v.produto}</td>
+          <td class="p-3.5">${formatarMoeda(v.valor)}</td>
+          <td class="p-3.5 text-emerald-600">${formatarMoeda(v.entrada)}</td>
           <td class="p-3.5 font-bold ${v.falta > 0 ? 'text-amber-600' : 'text-slate-400'}">${formatarMoeda(v.falta)}</td>
-          <td class="p-3.5 text-xs text-slate-500">${formatarDataBR(v.prazo)}</td>
-          <td class="p-3.5">
-            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeClass}">${v.situacao}</span>
-          </td>
-          <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
-            ${v.falta > 0 ? `<button onclick='quitarRapido(${JSON.stringify(v)})' class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-semibold transition">Quitar</button>` : ''}
-            <button onclick='abrirModalEditar(${JSON.stringify(v)})' class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">Editar</button>
-          </td>
+          <td class="p-3.5 text-xs text-slate-500">${v.prazo || '-'}</td>
+          <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeClass}">${v.situacao}</span></td>
+          <td class="p-3.5 text-right"><button onclick='abrirModalEditar(${JSON.stringify(v)})' class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-semibold">Editar</button></td>
         `;
         tbody.appendChild(tr);
       });
     }
 
     function abrirModalNovaVenda() {
-      document.getElementById("modalTitulo").innerText = "Nova Venda";
       document.getElementById("editRowNumber").value = "";
-      document.getElementById("formVenda").reset();
       document.getElementById("campoData").value = new Date().toISOString().split("T")[0];
-      document.getElementById("btnExcluir").classList.add("hidden");
       document.getElementById("modalVenda").classList.remove("hidden");
       document.getElementById("modalVenda").classList.add("flex");
     }
 
     function abrirModalEditar(v) {
-      document.getElementById("modalTitulo").innerText = `Editar Venda #${v.garantia}`;
       document.getElementById("editRowNumber").value = v.rowNumber;
       document.getElementById("campoGarantia").value = v.garantia;
       document.getElementById("campoData").value = v.dataVenda;
@@ -395,7 +237,6 @@
       document.getElementById("campoPagamento").value = v.pagamento;
       document.getElementById("campoEntrada").value = v.entrada;
       document.getElementById("campoPrazo").value = v.prazo;
-      document.getElementById("btnExcluir").classList.remove("hidden");
       document.getElementById("modalVenda").classList.remove("hidden");
       document.getElementById("modalVenda").classList.add("flex");
     }
@@ -405,18 +246,8 @@
       document.getElementById("modalVenda").classList.remove("flex");
     }
 
-    function verificarQuitacao() {
-      if (document.getElementById("campoPagamento").value === "OK") {
-        document.getElementById("campoEntrada").value = document.getElementById("campoValor").value;
-      }
-    }
-
     async function salvarVenda(e) {
       e.preventDefault();
-      const btn = document.getElementById("btnSalvar");
-      btn.disabled = true;
-      btn.innerText = "Salvando...";
-
       const rowNumber = document.getElementById("editRowNumber").value;
       const dados = {
         garantia: document.getElementById("campoGarantia").value,
@@ -431,59 +262,17 @@
         prazo: document.getElementById("campoPrazo").value
       };
 
-      await enviarParaPlanilha({
-        senha: senhaAtual,
-        action: rowNumber ? "update" : "create",
-        rowNumber: rowNumber,
-        dados: dados
-      });
-
-      btn.disabled = false;
-      btn.innerText = "Salvar na Planilha";
-      fecharModal();
-      await carregarDados();
-    }
-
-    async function quitarRapido(v) {
-      if (!confirm(`Confirmar quitação total de ${v.cliente} (${formatarMoeda(v.valor)})?`)) return;
-      v.pagamento = "OK";
-      v.entrada = v.valor;
-      await enviarParaPlanilha({
-        senha: senhaAtual,
-        action: "update",
-        rowNumber: v.rowNumber,
-        dados: v
-      });
-      await carregarDados();
-    }
-
-    async function excluirVenda() {
-      const rowNumber = document.getElementById("editRowNumber").value;
-      if (!confirm("Tem certeza que deseja excluir esta venda da planilha?")) return;
-      await enviarParaPlanilha({
-        senha: senhaAtual,
-        action: "delete",
-        rowNumber: rowNumber
-      });
-      fecharModal();
-      await carregarDados();
-    }
-
-    async function enviarParaPlanilha(payload) {
       await fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ senha: senhaAtual, action: rowNumber ? "update" : "create", rowNumber, dados })
       });
+
+      fecharModal();
+      await carregarDados();
     }
 
     function formatarMoeda(val) {
       return Number(val || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    }
-
-    function formatarDataBR(iso) {
-      if (!iso) return "-";
-      const [y, m, d] = iso.split("-");
-      return `${d}/${m}/${y}`;
     }
   </script>
 </body>
