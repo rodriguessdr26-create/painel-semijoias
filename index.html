@@ -167,7 +167,7 @@
       }
     }
 
-    async function carregarDados() {
+async function carregarDados() {
       try {
         const res = await fetch(`${API_URL}?senha=${encodeURIComponent(senhaAtual)}`);
         const data = await res.json();
@@ -177,6 +177,11 @@
           renderizarTabela();
           return true;
         }
+      } catch (err) {
+        console.error(err);
+      }
+      return false;
+    }
       } catch (err) {
         console.error(err);
       }
